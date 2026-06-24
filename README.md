@@ -1,129 +1,124 @@
+<div align="center">
+
+<img src="assets/hero.png" alt="TokenLedger — one 5-second AI video = 246,840 tokens, and most of your AI bill you can't check at all" width="760">
+
 # TokenLedger
 
-Self-hosted, cross-provider LLM token metering and reconciliation. It logs every billable API
-call across providers and sessions, independently re-counts the text that is checkable, reconciles
-the provider's numbers three ways, and produces a dashboard plus a discrepancy report you can take
-to the provider. It sits on your own infrastructure. No prompt or response content leaves the box.
+**See how much of your AI bill is actually checkable — and how much you pay on pure trust. Every figure labelled EXACT, BOUNDED, or UNVERIFIABLE.**
 
-TokenLedger is by [Nativerse](https://nativerse-ventures.com). Landing page and walkthrough:
-[tokenledger.nativerse-ventures.com](https://tokenledger.nativerse-ventures.com).
+[![License](https://img.shields.io/badge/license-Apache--2.0-2A33C2)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-2A33C2)](pyproject.toml)
+[![Self-hosted](https://img.shields.io/badge/self--hosted-no%20data%20egress-1F8A4C)](#design-principles)
 
-## Why
+[Website](https://tokenledger.nativerse-ventures.com) · by [Nativerse](https://nativerse-ventures.com)
 
-Providers self-report token usage and bill you on it. The numbers are unsigned and rarely checked.
-Billing is now multi-bucket (input, cached input, output, reasoning), and on reasoning models most
-of what you pay for is hidden tokens you never see. TokenLedger makes the part that is checkable
-checked, and is honest about the part that is not.
+</div>
 
-## What it verifies, and how honestly
+---
 
-- **Output tokens, EXACT** on providers that share a public tokenizer (OpenAI, open-weight models
-  via tiktoken or the model's own tokenizer). It re-tokenises the text you actually received. Billed
-  above counted is a hard discrepancy.
-- **Input tokens, BOUNDED.** It re-counts what you sent plus documented message overhead, and flags
-  figures outside a tolerance band. It cannot reconstruct hidden server-side additions.
-- **Reasoning tokens, UNVERIFIABLE.** Billed but not returned. Recorded, never asserted.
-- **Cache hit/miss, UNVERIFIABLE per call.** Provider-internal. Recorded, verify behaviourally
-  across many calls.
-- **Billing period, three-way.** The sum of captured per-call usage against the provider's
-  billing or usage-API total. When a provider's own two numbers disagree, no tokenizer is needed.
+Providers self-report token usage and bill you on it. Some of that bill can be checked against what
+you actually received; most of it — reasoning and cache tokens you never see — cannot be checked by
+anyone. TokenLedger re-counts the output you received, reconciles it against the reported usage, and
+above all tells you **how much of your bill has any ground truth at all**, labelling every figure
+EXACT, BOUNDED, or UNVERIFIABLE. Self-hosted — no prompt or response content leaves your machine.
+
+> **What this is, and is not.** Re-counting the output is a *consistency check* that binds the bill to
+> the artifact you received — it catches substitution and metering bugs, but it is **not** an
+> independent measure of whether your true cost is fair. The genuine value is measuring the
+> unverifiable share. See [docs/known-limitations.md](docs/known-limitations.md).
+
+## See it in action
+
+![TokenLedger reconciling two live BytePlus video bills](assets/demo.gif)
+
+> Two real BytePlus (Seedance) video bills, re-derived from the delivered files. Video tokens follow
+> `(width × height / 1024) × frames`, so re-deriving the count (246,840 and 108,900, gap 0) is a
+> **consistency check**: it binds the bill to the file you received and would catch a 1080p-billed /
+> 480p-delivered swap, but a matching number is what an honest provider always produces. The figure
+> that should worry you is the **unverifiable majority** — reasoning and cache — that no method can
+> check. Reproduce: `examples/byteplus_validation.py`.
+
+## What it can and cannot check
+
+| Bucket | Confidence | How |
+| --- | --- | --- |
+| **Output tokens** | **EXACT** | Re-tokenised with the model's real tokenizer (OpenAI via tiktoken; DeepSeek, Qwen, Llama, Mistral, Gemma via their own), pinned by provenance. A gap is a flag to investigate, not a verdict — it can mean over-reporting, the wrong tokenizer, or non-canonical generation. |
+| **Input tokens** | **BOUNDED** | Re-counts what you sent plus documented overhead; flags figures outside a tolerance band. Cannot reconstruct hidden server-side additions. |
+| **Reasoning tokens** | **UNVERIFIABLE** | Billed but never returned to you. Recorded, never asserted. On reasoning models this is most of the bill. |
+| **Cache hit/miss** | **UNVERIFIABLE** | Provider-internal per call. Recorded; verify behaviourally across many calls. |
+| **Billing period** | **THREE-WAY** | Captured per-call usage vs the provider's billing/usage-API total. When a provider's own two numbers disagree, no tokenizer is needed. |
 
 Every result carries its confidence label. The tool never claims proof it does not have.
-
-## Architectural constraint test (non-negotiables, checked before building)
-
-1. No data egress. All counting and reconciliation are local. Content can be stored hashed only
-   (`Store(redact=True)`).
-2. Honest confidence. Each bucket is EXACT, BOUNDED, or UNVERIFIABLE. No false certainty.
-3. Passive. Logging never changes or breaks the real call. A logging failure is swallowed.
-4. Multi-provider, multi-session, multi-user. Pluggable adapters, every record tagged.
-5. Vendor-neutral. Pricing and tolerances are configuration, not hard-coded assumptions.
 
 ## Quick start
 
 ```bash
-pip install "tokenledger[exact]"        # the CLI plus tiktoken and tokenizers (exact mode)
+git clone https://github.com/Neelagiri65/tokenledger
+cd tokenledger
+pip install -e ".[exact]"             # CLI + tiktoken + tokenizers (exact mode)
 
-tokenledger demo                         # offline demo: plants discrepancies, catches them
-open tokenledger_demo.html               # the dashboard
+retoken demo                       # offline demo: plants discrepancies, catches them
+open retoken_demo.html             # the dashboard
 ```
 
-`pip install tokenledger` alone runs in estimator mode, where exact-only buckets are labelled
-BOUNDED instead of EXACT. Tokenisation runs locally. Only the public tokenizer file is fetched
-once, and you can bundle it for air-gapped sites.
+Installing without the `[exact]` extra runs in estimator mode, where exact-only buckets are labelled
+BOUNDED instead of EXACT. Tokenisation runs locally; only the public tokenizer file is fetched once,
+and you can bundle it for air-gapped sites.
 
 ### Sidecar over an existing LiteLLM gateway
 
 LiteLLM already writes spend logs. Point TokenLedger at them and it audits the numbers from the
-outside. It is an out-of-band audit layer: it does not route or proxy your traffic, so it adds no
+outside — an out-of-band audit layer that does not route or proxy your traffic, so it adds no
 latency and no point of failure.
 
 ```bash
-tokenledger ingest litellm_spendlogs.jsonl --format litellm --db tokenledger.db
-tokenledger report --db tokenledger.db --html report.html --md discrepancy.md
+retoken ingest litellm_spendlogs.jsonl --format litellm --db tokenledger.db
+retoken report --db tokenledger.db --html report.html --md discrepancy.md
 open report.html
 ```
 
-Enable `STORE_PROMPTS_IN_SPEND_LOGS=true` on LiteLLM so output tokens can be re-counted exactly.
-Without captured text, output and input are reported as UNVERIFIABLE, never falsely flagged. Unlike
-LiteLLM and Helicone callbacks, which hand back the provider's own reported usage, TokenLedger
-re-tokenises independently. It verifies rather than aggregates.
+Set `STORE_PROMPTS_IN_SPEND_LOGS=true` on LiteLLM so output tokens can be re-counted exactly.
+Without captured text, output and input are reported as UNVERIFIABLE, never falsely flagged.
 
 ### Docker
 
 ```bash
-docker compose run --rm tokenledger demo
-docker compose run --rm tokenledger ingest litellm_spendlogs.jsonl --format litellm
-docker compose run --rm tokenledger report --html report.html
+docker compose run --rm retoken demo
+docker compose run --rm retoken ingest litellm_spendlogs.jsonl --format litellm
+docker compose run --rm retoken report --html report.html
 ```
 
-### Pre-built connectors
+## How it compares
 
-`tokenledger/connectors/` normalises gateway and provider logs into one canonical CallRecord
-schema. LiteLLM ships today (`--format litellm`), native event JSONL via `--format jsonl`, and a
-Bedrock invocation-log parser. Adapters normalise overlapping provider buckets to a disjoint model
-so cost is never double-counted.
+- **vs LiteLLM / Helicone** — those aggregate the provider's reported usage; a wrong number stays
+  wrong on the dashboard. TokenLedger **re-counts** the output independently — a consistency check
+  against the artifact you received — and measures the share that cannot be checked at all.
+- **vs CoIn** ([arXiv:2505.13778](https://arxiv.org/abs/2505.13778)) — that approach is cooperative,
+  needing the provider to publish commitments and a trusted auditor. TokenLedger is **passive**: you
+  only need the output you already received.
 
-## Quality capture: cost per accepted output
+## What it does not claim
 
-Cost is half the picture. What did the spend buy? Attach an optional per-call quality signal
-alongside cost, then read cost-per-accepted-output by activity in the CLI and HTML dashboard.
+It does not claim any provider is overbilling — in the runs above the counts matched exactly. It
+does not judge whether the unit price is fair. It checks the **count**, so that you can too, and it
+is explicit about how much of a modern bill nobody can independently check.
 
-```python
-from tokenledger import Store, record_call, QualitySignal
-store = Store("tokenledger.db")
-rec = record_call(store, provider="openai", model="gpt-4o", user_id=u, session_id=s,
-                  ts=iso_now, usage=response.usage, request_text=prompt, response_text=completion)
-# after your eval or accept event fires downstream:
-store.set_quality_by(rec.session_id, rec.request_sha,
-                     QualitySignal(eval_score=0.92, status="accept", success=True))
-```
+## Design principles
 
-*Accepted* is driven by one signal only, `status == 'accept'`. Cost-per-accepted charges the cost
-of rejected calls against the accepted ones, which is the waste signal. Calls with no label are
-excluded and reported as a separate unlabeled count, never read as a reject. Cost-per-accepted is
-descriptive. The thesis that it should drive model switching is not yet validated, and this view is
-not a migration recommendation.
-
-## Roadmap
-
-1. **Reconciliation.** Catch billing discrepancies and quantify them in dollars.
-2. **Quality capture.** Attach an optional task-level quality signal per call, record-time or
-   deferred, and read cost-per-accepted-output by activity. Descriptive only.
-3. **Model-switch advisory.** With cost and quality logged per task class, recommend moving
-   workloads to cheaper or open-weight models where they match quality at lower cost. Staged as
-   shadow, canary, then migrate, with the telemetry proving the call was right.
-
-The migration thesis, when open-weight models are viable substitutes and at what cost-quality
-trade-off, is being validated separately.
+1. **No data egress.** All counting and reconciliation are local. Content can be stored hashed only
+   (`Store(redact=True)`).
+2. **Honest confidence.** Each bucket is EXACT, BOUNDED, or UNVERIFIABLE. No false certainty.
+3. **Passive.** Logging never changes or breaks the real call; a logging failure is swallowed.
+4. **Multi-provider, multi-session, multi-user.** Pluggable adapters, every record tagged.
+5. **Vendor-neutral.** Pricing and tolerances are configuration, not hard-coded assumptions.
 
 ## Status
 
-The reconciliation engine, store, recorder, dashboard, discrepancy report, pluggable cost model,
-and migration evaluator are working and covered by the test suite. Real provider adapters parse
-OpenAI, Anthropic, LiteLLM, and Bedrock usage shapes. Demand and the closed-model band width are
-being validated with design partners. We do not claim a result we have not measured.
+The reconciliation engine, store, recorder, dashboard, discrepancy report, pluggable cost model, and
+connectors for OpenAI, Anthropic, LiteLLM, and Bedrock usage shapes are working and covered by the
+test suite. Demand and the closed-model band width are being validated with design partners. We do
+not claim a result we have not measured.
 
 ## Licence
 
-Apache-2.0. See `LICENSE`.
+Apache-2.0. See [`LICENSE`](LICENSE).
