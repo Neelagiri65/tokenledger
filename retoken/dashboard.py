@@ -290,7 +290,7 @@ def discrepancy_report_md(store: Store, num_messages: int = 1) -> str:
     return "\n".join(lines)
 
 
-def write_html(store: Store, path: str = "tokenledger.html", num_messages: int = 1) -> str:
+def write_html(store: Store, path: str = "retoken.html", num_messages: int = 1) -> str:
     recs = reconcile_all(store, num_messages)
     by_prov = rollup_by(recs, "provider")
     by_sess = rollup_by(recs, "session_id")

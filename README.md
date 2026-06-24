@@ -6,6 +6,7 @@
 
 **See how much of your AI bill is actually checkable — and how much you pay on pure trust. Every figure labelled EXACT, BOUNDED, or UNVERIFIABLE.**
 
+[![PyPI](https://img.shields.io/pypi/v/retoken?color=2A33C2)](https://pypi.org/project/retoken/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-2A33C2)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-2A33C2)](pyproject.toml)
 [![Self-hosted](https://img.shields.io/badge/self--hosted-no%20data%20egress-1F8A4C)](#design-principles)
@@ -53,12 +54,10 @@ Every result carries its confidence label. The tool never claims proof it does n
 ## Quick start
 
 ```bash
-git clone https://github.com/Neelagiri65/tokenledger
-cd tokenledger
-pip install -e ".[exact]"             # CLI + tiktoken + tokenizers (exact mode)
+pip install "retoken[exact]"          # CLI + tiktoken + tokenizers (exact mode)
 
-retoken demo                       # offline demo: plants discrepancies, catches them
-open retoken_demo.html             # the dashboard
+retoken demo                          # offline demo: plants discrepancies, catches them
+open retoken_demo.html                # the dashboard
 ```
 
 Installing without the `[exact]` extra runs in estimator mode, where exact-only buckets are labelled

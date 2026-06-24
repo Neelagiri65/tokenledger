@@ -51,7 +51,7 @@ _EXPECTED_COLUMNS: dict[str, str] = {
 
 
 class Store:
-    def __init__(self, path: str = "tokenledger.db", redact: bool = False):
+    def __init__(self, path: str = "retoken.db", redact: bool = False):
         self.path = path
         self.redact = redact
         self._init()

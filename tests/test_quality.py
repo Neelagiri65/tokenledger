@@ -15,11 +15,11 @@ from contextlib import redirect_stdout
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.core import CallRecord, Usage  # noqa: E402
-from tokenledger.quality import QualitySignal  # noqa: E402
-from tokenledger.store import Store  # noqa: E402
-from tokenledger.recorder import record_call  # noqa: E402
-from tokenledger.dashboard import (  # noqa: E402
+from retoken.core import CallRecord, Usage  # noqa: E402
+from retoken.quality import QualitySignal  # noqa: E402
+from retoken.store import Store  # noqa: E402
+from retoken.recorder import record_call  # noqa: E402
+from retoken.dashboard import (  # noqa: E402
     Rollup, cost_per_accepted, rollup_by, reconcile_all, print_summary, write_html, _CPA_NA,
     _CPA_CAVEAT,
 )
@@ -280,7 +280,7 @@ def test_row_missing_quality_columns_degrades_to_none():
     # The `name in r.keys()` guard: a row shape that LACKS the quality columns (older/unexpected
     # SELECT) must degrade to quality=None, never raise KeyError. Build such a Row via a
     # column-subset SELECT and feed it straight to the row->signal helper.
-    from tokenledger.store import _quality_from_row
+    from retoken.store import _quality_from_row
     path = _tmp_db()
     store = Store(path)
     _rec(store, session_id="s1", sha="s1", quality=QualitySignal(status="accept"))

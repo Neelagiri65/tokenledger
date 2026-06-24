@@ -8,26 +8,26 @@ inflated completion-token count so you can see the over-count caught live.
 In production it is the same code with two lines changed::
 
     from llm_bridge import create_llm
-    from tokenledger.connectors import metered
+    from retoken.connectors import metered
 
     llm = metered(create_llm({"provider": "openai", "model": "gpt-4o-mini"}),
-                  Store("tokenledger.db"), session_id="prod", on_call=alert)
+                  Store("retoken.db"), session_id="prod", on_call=alert)
     llm.complete("...")      # every call logged + reconciled; the rest of your code is unchanged
 
-Run:  .venv/bin/python -m examples.llm_bridge_metering && open tokenledger_bridge_demo.html
+Run:  .venv/bin/python -m examples.llm_bridge_metering && open retoken_bridge_demo.html
 """
 
 from __future__ import annotations
 
 import os
 
-from tokenledger.core import Verdict, count_tokens
-from tokenledger.store import Store
-from tokenledger.connectors import metered
-from tokenledger.dashboard import print_summary, write_html
+from retoken.core import Verdict, count_tokens
+from retoken.store import Store
+from retoken.connectors import metered
+from retoken.dashboard import print_summary, write_html
 
-DB = "tokenledger_bridge_demo.db"
-HTML = "tokenledger_bridge_demo.html"
+DB = "retoken_bridge_demo.db"
+HTML = "retoken_bridge_demo.html"
 
 ANSWER = ("Here is a concise refactor of the function with the traceback fixed and a unit "
           "test added. ") * 6

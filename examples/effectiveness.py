@@ -14,7 +14,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.core import CallRecord, Usage, count_tokens, reconcile_call, Verdict  # noqa: E402
+from retoken.core import CallRecord, Usage, count_tokens, reconcile_call, Verdict  # noqa: E402
 
 ANSWER = (
     "The mitochondria is the powerhouse of the cell. It generates most of the cell's supply of "

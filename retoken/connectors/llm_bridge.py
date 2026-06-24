@@ -8,7 +8,7 @@ swap one line — wrap your client in :func:`metered` — and every ``chat()`` /
 call is logged to TokenLedger and reconciled (output re-tokenised from the returned text,
 input bounded), with NO change to the rest of your application and NO effect on the call.
 
-Why this exists (see docs/research-tokenledger-landscape.md): gateways like LiteLLM/Helicone
+Why this exists (see docs/research-retoken-landscape.md): gateways like LiteLLM/Helicone
 expose callback hooks but hand back the PROVIDER's own reported usage — they aggregate and
 trust. TokenLedger attaches at the same response layer and adds INDEPENDENT re-tokenisation on
 top. That verify-vs-aggregate gap is the wedge; this connector is how it reaches llm_bridge.
@@ -238,11 +238,11 @@ def metered(
     Example::
 
         from llm_bridge import create_llm
-        from tokenledger.store import Store
-        from tokenledger.connectors import metered
+        from retoken.store import Store
+        from retoken.connectors import metered
 
         llm = metered(create_llm({"provider": "openai", "model": "gpt-4o-mini"}),
-                      Store("tokenledger.db"), session_id="prod")
+                      Store("retoken.db"), session_id="prod")
         llm.complete("Hello!")   # logged + reconciled, your code is otherwise unchanged
     """
     return MeteringLLMClient(

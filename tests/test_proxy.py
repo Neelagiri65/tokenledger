@@ -1,5 +1,5 @@
 """
-Tests for the wire-level capture sidecar (tokenledger/proxy.py). Deterministic unit tests on the
+Tests for the wire-level capture sidecar (retoken/proxy.py). Deterministic unit tests on the
 byte extractors + capture_and_record, plus a real-socket integration test that proves the relay is
 PASSIVE (client gets the upstream bytes verbatim; an upstream error still relays and never crashes)
 and that the call is recorded + reconciled from what we observed on the wire. All localhost, no keys.
@@ -14,9 +14,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.core import Verdict
-from tokenledger.store import Store
-from tokenledger import proxy as P
+from retoken.core import Verdict
+from retoken.store import Store
+from retoken import proxy as P
 
 
 def _tmp_db() -> str:
@@ -81,7 +81,7 @@ def test_capture_and_record_recounts_output_from_wire():
         assert r.model == "gpt-4o"
         assert "one two three four" in r.response_text   # re-counted from the bytes WE saw
         assert r.reported.output_tokens == 99
-        from tokenledger.core import reconcile_call
+        from retoken.core import reconcile_call
         out = [b for b in reconcile_call(r).buckets if b.bucket == "output"][0]
         assert out.verdict == Verdict.OVERCOUNT          # 99 reported vs ~4 on the wire
     finally:

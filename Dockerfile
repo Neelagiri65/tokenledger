@@ -2,7 +2,7 @@ FROM python:3.12-slim
 
 WORKDIR /app
 COPY pyproject.toml README.md ./
-COPY tokenledger ./tokenledger
+COPY retoken ./retoken
 COPY examples ./examples
 
 # Install with the `exact` extra so tiktoken is present for exact output-token verification.
@@ -12,5 +12,5 @@ RUN pip install --no-cache-dir ".[exact]"
 VOLUME ["/data"]
 WORKDIR /data
 
-ENTRYPOINT ["tokenledger"]
+ENTRYPOINT ["retoken"]
 CMD ["--help"]

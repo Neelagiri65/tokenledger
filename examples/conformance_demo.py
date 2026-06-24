@@ -10,8 +10,8 @@ from __future__ import annotations
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.core import count_tokens          # noqa: E402
-from tokenledger.conformance import run_conformance  # noqa: E402
+from retoken.core import count_tokens          # noqa: E402
+from retoken.conformance import run_conformance  # noqa: E402
 
 
 def _true(text: str) -> int:

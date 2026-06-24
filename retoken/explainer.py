@@ -2,7 +2,7 @@
 Living architecture dashboard generator. Writes the plain-language explainer (the six building
 blocks, the build assembly line, the resilience story) WITH two data-driven sections injected from
 the durable logs: a CHECKPOINT TIMELINE (how things have progressed over time) and a RUN SNAPSHOT
-(current jobs). Regenerate any time — `tokenledger dashboard` — and the progress updates.
+(current jobs). Regenerate any time — `retoken dashboard` — and the progress updates.
 
 Self-contained HTML, no JS, no network (NO EGRESS). Placeholders are %%TOKENS%% filled by replace()
 so the CSS braces need no escaping.
@@ -59,7 +59,7 @@ _TEMPLATE = """<!doctype html>
 
   <h1>TokenLedger — how it all fits</h1>
   <p class="sub">A plain-language map of what we're building, how the AI agents build it, and how it's progressing.</p>
-  <p class="stamp">Snapshot generated: %%GENERATED%% &nbsp;·&nbsp; regenerate any time with <code>tokenledger dashboard</code></p>
+  <p class="stamp">Snapshot generated: %%GENERATED%% &nbsp;·&nbsp; regenerate any time with <code>retoken dashboard</code></p>
 
   <h2>The one-sentence version</h2>
   <p class="lead">Big companies want to use many AI providers (OpenAI, Anthropic, Google…) without being locked to one —
@@ -111,8 +111,8 @@ _TEMPLATE = """<!doctype html>
     <p>You don't have to take my word for what's running. In the Claude Code prompt, type:</p>
     <p style="margin:.6rem 0"><code>/workflows</code> — a live view of every agent, which phase it's in, progress in real time.</p>
     <p>For the durable board that survives a restart (reads the logbook):</p>
-    <p style="margin:.6rem 0"><code>tokenledger cockpit --html cockpit.html</code> — all runs + resume commands.</p>
-    <p style="margin:.6rem 0"><code>tokenledger dashboard</code> — regenerate THIS page with the latest progress.</p>
+    <p style="margin:.6rem 0"><code>retoken cockpit --html cockpit.html</code> — all runs + resume commands.</p>
+    <p style="margin:.6rem 0"><code>retoken dashboard</code> — regenerate THIS page with the latest progress.</p>
   </div>
 
   <h2>What happens if a limit cuts us off</h2>

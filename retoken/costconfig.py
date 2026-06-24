@@ -2,7 +2,7 @@
 Vendor-neutral cost-model config — declare a rented/flat/per-token model in a JSON file so a
 partner can register a non-token endpoint WITHOUT writing code. Loaded into core.COST_MODELS.
 
-File shape (tokenledger-models.json by default):
+File shape (retoken-models.json by default):
   {
     "models": {
       "my-rented-llama": {"type": "rented_compute", "usd_per_gpu_hour": 3.5,
@@ -26,7 +26,7 @@ from .core import (
     COST_MODELS, CostModel, PerTokenCost, FlatSubscriptionCost, RentedComputeCost,
 )
 
-DEFAULT_CONFIG = "tokenledger-models.json"
+DEFAULT_CONFIG = "retoken-models.json"
 
 # Per type: the spec keys allowed (and, for the required ones, no default). Keeping this explicit
 # gives clear errors instead of silently dropping a misspelled field.

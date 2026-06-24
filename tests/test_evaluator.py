@@ -1,6 +1,6 @@
 """
 Architectural constraint + acceptance tests for the migration evaluator
-(tokenledger/evaluator.py). Written to the spec's NON-NEGOTIABLES:
+(retoken/evaluator.py). Written to the spec's NON-NEGOTIABLES:
 
   - No data egress / no network import in the module (test 7).
   - NEVER assert a switch without measured quality (tests 4, 5).
@@ -19,14 +19,14 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger import core
-from tokenledger.core import (
+from retoken import core
+from retoken.core import (
     CallRecord, Usage, Confidence, UsageAggregate,
     PerTokenCost, FlatSubscriptionCost, RentedComputeCost, PRICING, COST_MODELS,
     count_tokens, cost_model_for,
 )
-from tokenledger.quality import QualitySignal
-from tokenledger.evaluator import (
+from retoken.quality import QualitySignal
+from retoken.evaluator import (
     Candidate, CandidateProjection, MigrationReport,
     evaluate_migration, breakeven, to_dict,
     QUALITY_MEASURED, QUALITY_UNKNOWN,
@@ -232,7 +232,7 @@ def test_reasoning_reused_bounded_with_note():
 # --- 7. no-egress: module source has no network import -----------------------------------
 
 def test_no_network_import_in_module():
-    import tokenledger.evaluator as ev
+    import retoken.evaluator as ev
     src = open(ev.__file__, "r", encoding="utf-8").read()
     for bad in ("import requests", "import urllib", "import httpx",
                 "import socket", "from urllib", "from requests", "from httpx",
@@ -337,7 +337,7 @@ def test_same_model_nets_zero_overcount_is_separate_reconciliation():
     assert report.reconciliation_gap_usd > 0
     assert "reconciliation finding" in report.caveat.lower()
     # the honesty message must reach the RENDERED output, not just the object
-    from tokenledger.evaluator import render_report
+    from retoken.evaluator import render_report
     assert "NOT a migration saving" in render_report(report)
     print("PASS test_same_model_nets_zero_overcount_is_separate_reconciliation")
 
@@ -377,7 +377,7 @@ def test_closed_candidate_cost_claim_is_bounded_not_verified():
 def test_cli_candidate_id_with_colon_preserved():
     # RUN-AND-OBSERVE catch: a Bedrock model id ends in ':version'. The CLI must NOT split it into
     # provider/model on the colon (that turned 'amazon.nova-pro-v1:0' into model '0').
-    from tokenledger.cli import _parse_candidate
+    from retoken.cli import _parse_candidate
     assert _parse_candidate("amazon.nova-pro-v1:0") == ("amazon", "amazon.nova-pro-v1:0")
     assert _parse_candidate("us.meta.llama3-1-70b-instruct-v1:0") == ("meta", "us.meta.llama3-1-70b-instruct-v1:0")
     assert _parse_candidate("anthropic.claude-3-5-sonnet-20240620-v1:0")[0] == "anthropic"
@@ -388,7 +388,7 @@ def test_cli_candidate_id_with_colon_preserved():
 def test_render_report_shows_confidence_and_caveat():
     rec = _call("gpt-4o", "openai", "summarise the report", "Revenue rose twelve percent",
                 Usage(input_tokens=50, output_tokens=40))
-    from tokenledger.evaluator import render_report
+    from retoken.evaluator import render_report
     report = evaluate_migration([rec], [Candidate(model="gpt-4o-mini", provider="openai")])
     text = render_report(report)
     assert "Migration evaluation" in text
@@ -405,8 +405,8 @@ def test_render_report_shows_confidence_and_caveat():
 def test_cli_evaluate_end_to_end():
     # The headline feature must be runnable WITHOUT writing Python (advisor catch: was library-only).
     import json as _json
-    from tokenledger.store import Store
-    from tokenledger.cli import main
+    from retoken.store import Store
+    from retoken.cli import main
     fd, dbpath = tempfile.mkstemp(suffix=".db"); os.close(fd); os.remove(dbpath)
     jsonpath = dbpath.replace(".db", ".json")
     db = Store(dbpath)

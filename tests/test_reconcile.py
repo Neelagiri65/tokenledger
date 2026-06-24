@@ -3,7 +3,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.core import (  # noqa: E402
+from retoken.core import (  # noqa: E402
     CallRecord, Usage, Verdict, Confidence, reconcile_call,
     reconcile_billing_period, count_tokens, PRICING,
 )
@@ -59,8 +59,8 @@ def test_reasoning_unverifiable():
 def test_adapters_normalize_to_disjoint_no_double_count():
     # OpenAI reports OVERLAPPING (prompt_tokens INCL cached; completion_tokens INCL reasoning).
     # from_openai must SUBTRACT the subsets so each token is counted ONCE (else cost double-counts).
-    from tokenledger.recorder import from_openai, from_anthropic
-    from tokenledger.core import _cost
+    from retoken.recorder import from_openai, from_anthropic
+    from retoken.core import _cost
     oa = from_openai({"prompt_tokens": 1000, "completion_tokens": 1186,
                       "completion_tokens_details": {"reasoning_tokens": 1024},
                       "prompt_tokens_details": {"cached_tokens": 200}})
@@ -77,8 +77,8 @@ def test_adapters_normalize_to_disjoint_no_double_count():
 
 
 def test_normalized_usage_not_re_adapted():
-    from tokenledger.store import Store
-    from tokenledger.recorder import record_call
+    from retoken.store import Store
+    from retoken.recorder import record_call
     import os
     db = "_t.db"
     if os.path.exists(db):
@@ -109,7 +109,7 @@ def test_missing_text_is_unverifiable_not_overcount():
 
 
 def test_activity_classification():
-    from tokenledger.classify import classify_text, classify_from_tags
+    from retoken.classify import classify_text, classify_from_tags
     assert classify_text("Please refactor this function and fix the traceback\n```py\n```") == "coding"
     assert classify_text("draft a cold email to follow up with the prospect") == "outreach"
     assert classify_text("write a press release announcement for the newsroom") == "pr"
@@ -121,7 +121,7 @@ def test_activity_classification():
 
 
 def test_conformance_catches_jitter_not_consistent_bias():
-    from tokenledger.conformance import run_conformance
+    from retoken.conformance import run_conformance
     true = lambda t: count_tokens(t, "openai", "gpt-4o")[0]  # noqa: E731
     assert run_conformance(true).passed                      # honest meter passes
     calls = {"n": 0}
@@ -133,7 +133,7 @@ def test_conformance_catches_jitter_not_consistent_bias():
 
 
 def test_calibration_catches_systematic_bias():
-    from tokenledger.calibration import detect_systematic_bias, invariant_probes, validate_invariance
+    from retoken.calibration import detect_systematic_bias, invariant_probes, validate_invariance
     tt = lambda t: count_tokens(t, "openai", "gpt-4o")[0]  # noqa: E731
     assert validate_invariance(invariant_probes(), {"tiktoken": tt})["tiktoken"]
     assert not detect_systematic_bias(tt).biased                      # faithful
@@ -146,7 +146,7 @@ def test_open_weight_model_not_mislabeled_tiktoken_under_openai_provider():
     # OpenAI-COMPATIBLE endpoint (vLLM/Ollama/internal gateway, provider="openai") must be
     # counted with ITS OWN tokenizer — never tiktoken's count mislabeled EXACT. Without the
     # reorder, the tiktoken branch would fire first and return (tiktoken_count, EXACT).
-    import tokenledger.core as core
+    import retoken.core as core
     text = "def fib(n):\n    return n if n < 2 else fib(n-1) + fib(n-2)  # recursion\n" * 4
     tk_count, tk_conf = count_tokens(text, "openai", "gpt-4o")   # genuine OpenAI → tiktoken EXACT
     assert tk_conf is Confidence.EXACT
@@ -170,7 +170,7 @@ def test_reasoning_canonical_disjoint_no_false_overcount():
     # CANONICAL pipeline: from_openai normalises raw OVERLAPPING usage (completion incl reasoning) to
     # DISJOINT (visible output + separate reasoning), so reconcile compares visible output directly —
     # no false OVERCOUNT, and reasoning is NOT double-counted in cost.
-    from tokenledger.recorder import from_openai
+    from retoken.recorder import from_openai
     visible = "The answer is 42."
     vis, _ = count_tokens(visible, "openai", "gpt-4o")
     u = from_openai({"prompt_tokens": 20, "completion_tokens": vis + 1024,

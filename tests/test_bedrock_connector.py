@@ -10,9 +10,9 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.core import Confidence, reconcile_call, Verdict
-from tokenledger.store import Store
-from tokenledger.connectors.bedrock import (
+from retoken.core import Confidence, reconcile_call, Verdict
+from retoken.store import Store
+from retoken.connectors.bedrock import (
     parse_bedrock_record, ingest_bedrock_invocation_logs, _provider_model_from_bedrock_id,
     bedrock_model_swap_candidates, BEDROCK_MODEL_SWAP_MATRIX,
 )
@@ -124,7 +124,7 @@ def test_model_swap_matrix():
 
 
 def test_no_network_import_in_module():
-    import tokenledger.connectors.bedrock as b
+    import retoken.connectors.bedrock as b
     with open(b.__file__, "r", encoding="utf-8") as f:
         src = f.read()
     for bad in ("import requests", "import urllib", "import httpx", "import socket",

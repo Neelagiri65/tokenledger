@@ -20,8 +20,8 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger import core
-from tokenledger.core import (
+from retoken import core
+from retoken.core import (
     Usage, Confidence, Verdict, CallRecord,
     PerTokenCost, FlatSubscriptionCost, RentedComputeCost,
     UsageAggregate, CostResult, cost_model_for, COST_MODELS, PRICING, _cost,
@@ -119,7 +119,7 @@ def test_effective_per_token_is_period_cost_over_tokens_for_all_shapes():
 # --- 5. overbill USD is N/A for non-per_token_billable (the silent-bug guard) ------------
 
 def test_overbill_usd_na_for_capacity_models():
-    from tokenledger.dashboard import _price
+    from retoken.dashboard import _price
     assert _price("gpt-4o") is not None                    # per_token: a rate exists to dispute against
     COST_MODELS["rented-llama"] = RentedComputeCost(usd_per_gpu_hour=3.0, gpu_count=1, gpu_hours=10.0)
     try:
@@ -132,8 +132,8 @@ def test_overbill_usd_na_for_capacity_models():
 def test_capacity_overcount_tracks_tokens_but_not_dollars():
     # An output over-count on a capacity model records the token surplus but leaves overbill $ at 0
     # (there is no per-token bill to put a dollar figure on). Per-token models still get the $.
-    from tokenledger.store import Store
-    from tokenledger.dashboard import rollup_by, reconcile_all
+    from retoken.store import Store
+    from retoken.dashboard import rollup_by, reconcile_all
 
     COST_MODELS["rented-qwen"] = RentedComputeCost(usd_per_gpu_hour=2.0, gpu_count=1, gpu_hours=24.0)
     fd, dbpath = tempfile.mkstemp(suffix=".db")
@@ -163,9 +163,9 @@ def test_capacity_fee_amortised_across_buckets_not_multiplied():
     # A flat fee split across MULTIPLE rollup buckets must sum to the fee ONCE (amortised by token
     # share), not re-applied per bucket. This is the partition-invariance bug the per-bucket
     # period_cost() had — it needs >=2 buckets to surface.
-    from tokenledger.store import Store
-    from tokenledger.dashboard import rollup_by, reconcile_all, cost_per_accepted
-    from tokenledger.quality import QualitySignal
+    from retoken.store import Store
+    from retoken.dashboard import rollup_by, reconcile_all, cost_per_accepted
+    from retoken.quality import QualitySignal
 
     COST_MODELS["flat-model"] = FlatSubscriptionCost(fee_per_period=100.0)
     fd, dbpath = tempfile.mkstemp(suffix=".db")
@@ -222,8 +222,8 @@ def test_out_of_band_estimate_not_dollarised_as_exact_overbill():
     # HARNESS cross-cutting catch: a closed-provider OUT_OF_BAND (BOUNDED estimate) output must NOT
     # be charged into the precise 'overbill $' column — only an EXACT OVERCOUNT may. It is still
     # FLAGGED (a real discrepancy) but carries no exact dollar figure.
-    from tokenledger.store import Store
-    from tokenledger.dashboard import rollup_by, reconcile_all
+    from retoken.store import Store
+    from retoken.dashboard import rollup_by, reconcile_all
     fd, dbpath = tempfile.mkstemp(suffix=".db"); os.close(fd); os.remove(dbpath)
     db = Store(dbpath)
     try:

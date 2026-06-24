@@ -1,5 +1,5 @@
 """
-Tests for the checkpoint log + living dashboard (tokenledger/checkpoint.py, explainer.py).
+Tests for the checkpoint log + living dashboard (retoken/checkpoint.py, explainer.py).
 The checkpoint log is the durable progress record that survives a limit and drives the timeline.
 """
 
@@ -8,11 +8,11 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.checkpoint import (  # noqa: E402
+from retoken.checkpoint import (  # noqa: E402
     Checkpoint, add_checkpoint, load_checkpoints, timeline_html,
 )
-from tokenledger.explainer import write_dashboard  # noqa: E402
-from tokenledger.manifest import Run, record_run  # noqa: E402
+from retoken.explainer import write_dashboard  # noqa: E402
+from retoken.manifest import Run, record_run  # noqa: E402
 
 CP = "_t_checkpoints.jsonl"
 RUN = "_t_runs.jsonl"

@@ -13,11 +13,11 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger import (  # noqa: E402
+from retoken import (  # noqa: E402
     Store, Usage, QualitySignal, record_call, print_summary, write_html,
 )
-from tokenledger.core import count_tokens, reconcile_billing_period  # noqa: E402
-from tokenledger.dashboard import discrepancy_report_md  # noqa: E402
+from retoken.core import count_tokens, reconcile_billing_period  # noqa: E402
+from retoken.dashboard import discrepancy_report_md  # noqa: E402
 
 ANSWER = (
     "The mitochondria is the powerhouse of the cell. It generates most of the cell's "
@@ -29,7 +29,7 @@ PROMPT = "Explain in a short paragraph what the mitochondria does in a cell."
 
 
 def main() -> None:
-    db = "tokenledger_demo.db"
+    db = "retoken_demo.db"
     if os.path.exists(db):
         os.remove(db)
     store = Store(db)
@@ -90,7 +90,7 @@ def main() -> None:
                                        per_call_sum=captured_sum)
     print(f"Billing-period reconciliation: {v.value} — {note}\n")
 
-    html_path = write_html(store, "tokenledger_demo.html")
+    html_path = write_html(store, "retoken_demo.html")
     with open("discrepancy_report.md", "w", encoding="utf-8") as f:
         f.write(discrepancy_report_md(store))
     print(f"Wrote {html_path} and discrepancy_report.md")

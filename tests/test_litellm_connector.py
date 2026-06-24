@@ -1,5 +1,5 @@
 """
-Tests for the LiteLLM connector — the DEFAULT ingest path (`tokenledger ingest --format litellm`),
+Tests for the LiteLLM connector — the DEFAULT ingest path (`retoken ingest --format litellm`),
 which shipped a fixture but no test (coverage gap flagged by the harness review). Covers field
 mapping, the cache_hit fallback, defensive skips, and end-to-end ingest of the bundled sample with
 the honest no-text -> UNVERIFIABLE behaviour.
@@ -10,9 +10,9 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.core import Verdict, reconcile_call
-from tokenledger.store import Store
-from tokenledger.connectors.litellm import parse_litellm_row, ingest_litellm_spendlog
+from retoken.core import Verdict, reconcile_call
+from retoken.store import Store
+from retoken.connectors.litellm import parse_litellm_row, ingest_litellm_spendlog
 
 _SAMPLE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                        "examples", "sample_litellm_spendlog.jsonl")
@@ -77,7 +77,7 @@ def test_captures_provider_reported_cost():
 
 
 def test_reported_cost_roundtrips_and_surfaces_in_rollup():
-    from tokenledger.dashboard import rollup_by, reconcile_all
+    from retoken.dashboard import rollup_by, reconcile_all
     db = _tmp_db(); store = Store(db)
     try:
         n = ingest_litellm_spendlog(_SAMPLE, store)

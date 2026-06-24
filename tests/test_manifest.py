@@ -1,5 +1,5 @@
 """
-Tests for the run manifest (tokenledger/manifest.py) — the resilience spine.
+Tests for the run manifest (retoken/manifest.py) — the resilience spine.
 
 The load-bearing guarantee: a resume command for an incomplete run ALWAYS carries the run's full
 args, so the args-drop failure observed this session can never recur. Also covers record/load,
@@ -11,7 +11,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.manifest import (  # noqa: E402
+from retoken.manifest import (  # noqa: E402
     Run, record_run, load_runs, update_run, incomplete, resume_command,
 )
 

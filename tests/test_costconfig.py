@@ -1,5 +1,5 @@
 """
-Tests for the cost-model config (tokenledger/costconfig.py) and the dashboard's BOUNDED-cost
+Tests for the cost-model config (retoken/costconfig.py) and the dashboard's BOUNDED-cost
 surfacing. Non-negotiables exercised:
   - config builds the right cost model per type; a bad/unknown spec FAILS LOUD (never silently
     costs a model with the wrong shape);
@@ -14,14 +14,14 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.core import (
+from retoken.core import (
     COST_MODELS, CallRecord, Usage, PerTokenCost, FlatSubscriptionCost, RentedComputeCost,
 )
-from tokenledger.costconfig import (
+from retoken.costconfig import (
     model_from_spec, read_config, load_cost_models, add_model, DEFAULT_CONFIG,
 )
-from tokenledger.store import Store
-from tokenledger.dashboard import rollup_by, reconcile_all
+from retoken.store import Store
+from retoken.dashboard import rollup_by, reconcile_all
 
 
 def _tmp_json() -> str:
@@ -194,7 +194,7 @@ def test_dashboard_marks_flat_and_mixed_bucket_bounded():
 
 def test_html_renders_bounded_marker_and_legend():
     # Review catch: assert the RENDERING, not just internal state — a bug dropping '~' must fail.
-    from tokenledger.dashboard import write_html
+    from retoken.dashboard import write_html
     COST_MODELS["rented-h"] = RentedComputeCost(usd_per_gpu_hour=10, gpu_count=1, gpu_hours=24)
     dbpath = _tmp_db()
     htmlpath = dbpath.replace(".db", ".html")
@@ -219,7 +219,7 @@ def test_html_renders_bounded_marker_and_legend():
 
 def test_cli_add_missing_per_token_field_rejected():
     # Review catch: per_token rejection (was only rented tested). Missing --reasoning must fail.
-    from tokenledger.cli import main
+    from retoken.cli import main
     path = _tmp_json()
     try:
         rc = main(["models", "add", "incomplete", "--type", "per_token",
@@ -237,7 +237,7 @@ def test_cli_add_missing_required_field_rejected():
     # RUN-AND-OBSERVE catch: argparse must NOT default a required field to 0.0 and silently accept
     # an incomplete model. `models add bad --type rented_compute` (no usd_per_gpu_hour) must FAIL
     # and write nothing.
-    from tokenledger.cli import main
+    from retoken.cli import main
     path = _tmp_json()
     try:
         rc = main(["models", "add", "bad", "--type", "rented_compute", "--config", path])

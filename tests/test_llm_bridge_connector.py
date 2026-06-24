@@ -1,5 +1,5 @@
 """
-Tests for the llm_bridge metering wrapper (tokenledger/connectors/llm_bridge.py).
+Tests for the llm_bridge metering wrapper (retoken/connectors/llm_bridge.py).
 
 These run with NO llm_bridge installed: the wrapper is exercised against a duck-typed fake
 client that mimics llm_bridge's LLMClient / LLMResponse contract. That is deliberate — the
@@ -18,10 +18,10 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tokenledger.core import Verdict, count_tokens  # noqa: E402
-from tokenledger.quality import QualitySignal  # noqa: E402
-from tokenledger.store import Store  # noqa: E402
-from tokenledger.connectors import metered, MeteringLLMClient  # noqa: E402
+from retoken.core import Verdict, count_tokens  # noqa: E402
+from retoken.quality import QualitySignal  # noqa: E402
+from retoken.store import Store  # noqa: E402
+from retoken.connectors import metered, MeteringLLMClient  # noqa: E402
 
 RESP_TEXT = "The quick brown fox jumps over the lazy dog. " * 8
 _FIXED_TS = lambda: "2026-06-22T00:00:00+00:00"  # noqa: E731 - deterministic, no clock in tests
