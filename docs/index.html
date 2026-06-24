@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>retoken / TokenLedger — put a number on the AI spend black box</title>
+<meta name="description" content="Open source, self-hosted. Re-count the output an AI provider bills, label every figure EXACT, BOUNDED, or UNVERIFIABLE, and measure how much of the bill has any ground truth at all.">
+<meta property="og:title" content="TokenLedger — AI spend is a black box. Trust is the meter.">
+<meta property="og:description" content="Open source. Measure how much of an AI bill is accountable, and how much is paid on trust.">
+<meta property="og:image" content="https://nativerse-ventures.com/assets/og-home.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=sentient@400,500,700&f[]=supreme@400,500&f[]=tabular@400,500&display=swap">
+<style>
+ :root{--paper:#FAFAF6;--ink:#16160F;--ink2:#3A3A30;--muted:#6B6B5E;--blue:#2A33C2;--ok:#1F8A4C;--warn:#B26A00;--danger:#C0392B;--hair:#E7E6DE;
+  --disp:"Sentient",Georgia,serif;--text:"Supreme",system-ui,sans-serif;--mono:"Tabular",ui-monospace,monospace}
+ *{box-sizing:border-box;margin:0} html{-webkit-font-smoothing:antialiased}
+ body{background:var(--paper);color:var(--ink2);font-family:var(--text);line-height:1.6;padding:56px 22px 90px}
+ .col{max-width:760px;margin:0 auto}
+ .top{display:flex;align-items:center;gap:11px;margin-bottom:34px}
+ .top img{width:32px;height:32px} .top .nm{font-family:var(--disp);font-weight:500;font-size:22px;color:var(--ink)}
+ .top .by{font-family:var(--mono);font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+ h1{font-family:var(--disp);font-weight:500;font-size:clamp(2.1rem,1.6rem+2vw,3rem);line-height:1.06;letter-spacing:-1.2px;color:var(--ink);margin-bottom:14px}
+ .lead{font-size:19px;color:var(--ink2);max-width:60ch;margin-bottom:26px}
+ .lead b{color:var(--ink);font-weight:500}
+ .cta{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:30px}
+ .btn{font-family:var(--text);font-size:15px;font-weight:500;padding:11px 20px;border-radius:8px;text-decoration:none;border:1px solid var(--hair)}
+ .btn.p{background:var(--blue);color:#fff;border-color:var(--blue)} .btn.s{background:#fff;color:var(--ink)}
+ pre{font-family:var(--mono);font-size:15px;background:#fff;border:1px solid var(--hair);border-radius:8px;padding:16px 18px;overflow:auto;margin-bottom:30px;color:var(--ink)}
+ pre .c{color:var(--muted)} pre .k{color:var(--blue)}
+ img.fig{width:100%;border:1px solid var(--hair);border-radius:12px;margin:8px 0 30px}
+ h2{font-family:var(--disp);font-weight:500;font-size:1.4rem;color:var(--ink);margin:38px 0 12px}
+ table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--hair);border-radius:10px;overflow:hidden;font-size:15px;margin-bottom:18px}
+ th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--hair)} th{font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:#fff}
+ tbody tr:last-child td{border-bottom:none}
+ .e{color:var(--ok);font-weight:500} .b{color:var(--warn);font-weight:500} .u{color:var(--danger);font-weight:500}
+ blockquote{margin:8px 0 26px;padding:14px 20px;border-left:3px solid var(--blue);background:#fff;border-radius:6px;color:var(--ink);font-family:var(--disp);font-size:18px}
+ a{color:var(--blue)} .foot{margin-top:46px;padding-top:18px;border-top:1px solid var(--hair);font-family:var(--mono);font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body><div class="col">
+ <div class="top">
+  <img src="https://tokenledger.nativerse-ventures.com/assets/icon-512.png" alt="">
+  <span class="nm">TokenLedger</span><span class="by">by Nativerse</span>
+ </div>
+
+ <h1>AI spend is a black box. Trust is the meter.</h1>
+ <p class="lead"><b>TokenLedger puts a number on how much of an AI bill is accountable, and how much is
+  not.</b> Open source, self-hosted. Re-count the output a provider bills, label every figure EXACT,
+  BOUNDED, or UNVERIFIABLE, and measure the share that no one can check.</p>
+
+ <div class="cta">
+  <a class="btn p" href="https://pypi.org/project/retoken/">pip install retoken</a>
+  <a class="btn s" href="https://github.com/Neelagiri65/tokenledger">GitHub</a>
+  <a class="btn s" href="https://nativerse-ventures.com/the-unsigned-meter">Read the story</a>
+  <a class="btn s" href="https://tokenledger.nativerse-ventures.com">Website</a>
+ </div>
+
+ <pre><span class="k">pip install</span> "retoken[exact]"
+<span class="k">retoken</span> demo            <span class="c"># offline demo: plants discrepancies, flags them</span>
+<span class="c"># open retoken_demo.html</span></pre>
+
+ <img class="fig" src="providers.png" alt="Every model and cloud bills by the token, into a meter no one can read">
+
+ <h2>What it can, and cannot, check</h2>
+ <table>
+  <tr><th>Bucket</th><th>Confidence</th></tr>
+  <tr><td>Output tokens</td><td><span class="e">EXACT</span> &middot;re-counted with the model's own tokenizer, pinned by provenance</td></tr>
+  <tr><td>Input tokens</td><td><span class="b">BOUNDED</span> &middot;estimated within a band</td></tr>
+  <tr><td>Reasoning and cache</td><td><span class="u">UNVERIFIABLE</span> &middot;billed, never returned, most of a modern bill</td></tr>
+ </table>
+
+ <blockquote>Re-counting the output is a consistency check that binds the bill to the delivered
+  artifact. It is not an independent measure of true cost. The genuine value is measuring how much of
+  the bill has any ground truth at all.</blockquote>
+ <p>Full method and limits: <a href="https://github.com/Neelagiri65/tokenledger/blob/master/docs/known-limitations.md">known-limitations.md</a>.</p>
+
+ <p class="foot">TokenLedger, by <a href="https://nativerse-ventures.com">Nativerse</a> &middot; Apache-2.0 &middot; pip install retoken</p>
+</div></body></html>
