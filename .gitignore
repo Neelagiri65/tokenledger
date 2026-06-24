@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# Local data and generated artifacts
+*.db
+tokenledger_demo.html
+tokenledger_bridge_demo.html
+report.html
+discrepancy*.md
+cockpit.html
+tokenledger-models.json
+media/frames/
+media/slides/
+*.mp4
+
+# Test and coverage
+.coverage
+htmlcov/
+.pytest_cache/

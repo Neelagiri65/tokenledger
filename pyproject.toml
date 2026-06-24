@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tokenledger"
+version = "0.1.0"
+description = "Self-hosted, cross-provider LLM token metering reconciliation — independently verify what providers bill you and find where to migrate."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = []
+
+[project.optional-dependencies]
+# Exact output-token verification: tiktoken for OpenAI, HF `tokenizers` for open-weight
+# models (Qwen/Mistral/Llama/DeepSeek/Gemma). Without these the estimator is used and those
+# counts are labelled BOUNDED instead of EXACT. Tokenisation runs locally; only the public
+# tokenizer file is fetched once (bundle it for air-gapped sites).
+exact = ["tiktoken>=0.7.0", "tokenizers>=0.20", "huggingface_hub>=0.24"]
+
+[project.scripts]
+tokenledger = "tokenledger.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["tokenledger*"]

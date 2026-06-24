@@ -1,0 +1,5 @@
+# Core runs on the Python standard library alone (sqlite3, hashlib, dataclasses).
+# tiktoken is optional but strongly recommended: it gives EXACT output-token verification
+# for OpenAI and open models. Without it, TokenLedger falls back to an estimator and
+# labels those counts BOUNDED instead of EXACT.
+tiktoken>=0.7.0

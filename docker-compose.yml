@@ -1,0 +1,31 @@
+# TokenLedger as a self-hosted sidecar. Nothing leaves the box: it reads the gateway's spend
+# logs from a mounted directory and writes the audit + dashboard back to the same volume.
+#
+# Quickstart:
+#   1) put your LiteLLM SpendLogs export at ./data/litellm_spendlogs.jsonl
+#   2) docker compose run --rm tokenledger ingest litellm_spendlogs.jsonl --format litellm
+#   3) docker compose run --rm tokenledger report --html report.html --md discrepancy.md
+#   4) open ./data/report.html
+#
+# Or just see it work with no data of your own:
+#   docker compose run --rm tokenledger demo
+
+services:
+  tokenledger:
+    build: .
+    image: tokenledger:local
+    volumes:
+      - ./data:/data
+    # default command shows help; pass a subcommand via `docker compose run`
+    command: ["--help"]
+
+  # --- Example: run your LiteLLM gateway alongside, writing spend logs to the shared volume.
+  # Uncomment and configure to run the full sidecar topology locally.
+  # litellm:
+  #   image: ghcr.io/berriai/litellm:main-latest
+  #   environment:
+  #     - STORE_PROMPTS_IN_SPEND_LOGS=true   # so output tokens can be re-counted exactly
+  #   volumes:
+  #     - ./data:/data
+  #   ports:
+  #     - "4000:4000"
