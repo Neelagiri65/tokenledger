@@ -1,13 +1,13 @@
 """
 TokenLedger CLI — the outsider-runnable entry point.
 
-  tokenledger demo                         # offline demo (no keys), writes db + html + report
-  tokenledger ingest <file> [--format litellm|jsonl] [--db PATH]
-  tokenledger report [--db PATH] [--html PATH] [--md PATH]
+  retoken demo                         # offline demo (no keys), writes db + html + report
+  retoken ingest <file> [--format litellm|jsonl] [--db PATH]
+  retoken report [--db PATH] [--html PATH] [--md PATH]
 
 Quickstart (sidecar over an existing LiteLLM gateway):
-  tokenledger ingest litellm_spendlogs.jsonl --format litellm --db tokenledger.db
-  tokenledger report --db tokenledger.db --html report.html
+  retoken ingest litellm_spendlogs.jsonl --format litellm --db retoken.db
+  retoken report --db retoken.db --html report.html
 """
 
 from __future__ import annotations
@@ -24,16 +24,9 @@ from .connectors import ingest_litellm_spendlog
 
 
 def _cmd_demo(args: argparse.Namespace) -> int:
-    # Defer to the bundled example so demo == what's documented.
-    here = os.path.dirname(os.path.abspath(__file__))
-    demo = os.path.join(os.path.dirname(here), "examples", "demo.py")
-    if os.path.exists(demo):
-        ns: dict = {"__name__": "__main__", "__file__": demo}
-        with open(demo, "r", encoding="utf-8") as f:
-            exec(compile(f.read(), demo, "exec"), ns)  # noqa: S102 - bundled, trusted
-        return 0
-    print("demo example not found (install the full package).", file=sys.stderr)
-    return 1
+    from .demo import main as _demo_main
+    _demo_main()
+    return 0
 
 
 def _opt_float(v):
@@ -97,7 +90,7 @@ def _cmd_ingest(args: argparse.Namespace) -> int:
 
 def _cmd_report(args: argparse.Namespace) -> int:
     if not os.path.exists(args.db):
-        print(f"db not found: {args.db} (run `tokenledger ingest` first)", file=sys.stderr)
+        print(f"db not found: {args.db} (run `retoken ingest` first)", file=sys.stderr)
         return 1
     # Register any rented/flat/per-token models declared in the config so their cost is computed
     # with the right (BOUNDED capacity) model rather than defaulting to per-token PRICING.
@@ -164,7 +157,7 @@ def _parse_candidate(s: str) -> tuple[str, str]:
 
 def _cmd_evaluate(args: argparse.Namespace) -> int:
     if not os.path.exists(args.db):
-        print(f"db not found: {args.db} (run `tokenledger ingest` first)", file=sys.stderr)
+        print(f"db not found: {args.db} (run `retoken ingest` first)", file=sys.stderr)
         return 1
     from .costconfig import load_cost_models
     from .evaluator import Candidate, evaluate_migration, render_report, to_dict
@@ -255,7 +248,7 @@ def _cmd_dashboard(args: argparse.Namespace) -> int:
 
 
 def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="tokenledger", description=__doc__,
+    p = argparse.ArgumentParser(prog="retoken", description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -281,24 +274,24 @@ def main(argv: list[str] | None = None) -> int:
     pi = sub.add_parser("ingest", help="ingest gateway/provider logs")
     pi.add_argument("file")
     pi.add_argument("--format", choices=["litellm", "bedrock", "jsonl"], default="litellm")
-    pi.add_argument("--db", default="tokenledger.db")
+    pi.add_argument("--db", default="retoken.db")
     pi.add_argument("--redact", action="store_true", help="store hashes only, no content at rest")
 
     pr = sub.add_parser("report", help="print summary + write dashboard/discrepancy report")
-    pr.add_argument("--db", default="tokenledger.db")
+    pr.add_argument("--db", default="retoken.db")
     pr.add_argument("--html", default=None)
     pr.add_argument("--md", default=None)
-    pr.add_argument("--config", default="tokenledger-models.json",
+    pr.add_argument("--config", default="retoken-models.json",
                     help="cost-model config (rented/flat models); ignored if absent")
 
     pe = sub.add_parser("evaluate", help="project the workload onto candidate models (migration eval)")
-    pe.add_argument("--db", default="tokenledger.db")
+    pe.add_argument("--db", default="retoken.db")
     pe.add_argument("--candidate", action="append", required=True, metavar="MODEL_ID",
                     help="a candidate model to evaluate (repeatable); e.g. gpt-4o-mini or "
                          "amazon.nova-pro-v1:0 (provider inferred from a dotted vendor prefix)")
     pe.add_argument("--accept-rate", action="append", metavar="model=rate", dest="accept_rate",
                     help="customer-measured accept rate for a candidate (repeatable); e.g. gpt-4o-mini=0.85")
-    pe.add_argument("--config", default="tokenledger-models.json",
+    pe.add_argument("--config", default="retoken-models.json",
                     help="cost-model config (rented/flat models); ignored if absent")
     pe.add_argument("--period", default=None, help="label for the report")
     pe.add_argument("--json", default=None, help="also write the report as JSON")
@@ -307,15 +300,15 @@ def main(argv: list[str] | None = None) -> int:
     pp.add_argument("--upstream", required=True, help="upstream provider base URL, e.g. https://api.openai.com")
     pp.add_argument("--port", type=int, default=8088)
     pp.add_argument("--provider", default="openai", help="provider label for tokenizer routing")
-    pp.add_argument("--db", default="tokenledger.db")
+    pp.add_argument("--db", default="retoken.db")
     pp.add_argument("--host", default="127.0.0.1")
 
     pm = sub.add_parser("models", help="register/list rented/flat/per-token cost models (no code)")
     msub = pm.add_subparsers(dest="action", required=True)
     ml = msub.add_parser("list", help="list registered cost models")
-    ml.add_argument("--config", default="tokenledger-models.json")
+    ml.add_argument("--config", default="retoken-models.json")
     ma = msub.add_parser("add", help="register a cost model")
-    ma.add_argument("--config", default="tokenledger-models.json")
+    ma.add_argument("--config", default="retoken-models.json")
     ma.add_argument("model_id", help="the served model id to attach this cost model to")
     ma.add_argument("--type", required=True,
                     choices=["per_token", "flat_subscription", "rented_compute"])
