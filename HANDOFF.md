@@ -4,6 +4,37 @@ Append-only. Newest entry on top. Never consolidate or delete prior entries.
 
 ---
 
+## 2026-07-20 (later) — Two-mode framing + scope-map policy input (backlog)
+
+Reviewed Rick Hightower's article "Securing LiteLLM's MCP Integration" (full 35-page PDF).
+Key realisation: it describes LiteLLM **client-library mode**, NOT the **gateway/proxy mode** our
+product targets. The author states "LiteLLM isn't a proxy or gateway — it's a client library" and
+hand-rolls his own MCP connection + OAuth-2.1 scope enforcement (`scope_mapping` dict +
+`_verify_token_scopes` JWT check). No `LiteLLM_SpendLogs`, no `ObjectPermissionTable`, "audit" is
+print statements only. So it maps the mode we're NOT in.
+
+Two LiteLLM worlds to be explicit about:
+- **Gateway/proxy mode (OUR TARGET)** — native object-permissions/toolsets, `LiteLLM_SpendLogs`
+  with per-tool cost, persistent rows. `mcp-audit` reads these directly. No new capture code.
+  Enterprise/platform buyers. **Build here first — data is already on disk.**
+- **Client-library mode (second front, NOT now)** — no proxy, no spend log, no persistent audit.
+  Larger dev population but we'd have to capture the tool calls ourselves. retoken ALREADY has the
+  mechanism: `retoken proxy` (wire-level passthrough capture sidecar) could sit in front and feed
+  the SAME `mcp-audit` engine. Same audit, different capture front-end.
+
+Backlog additions (not this sprint):
+- **B1. Scope-map as an alternate policy input** to `mcp-audit`. Some shops express agent
+  permissions as OAuth scopes (tool→scope), not LiteLLM grants. `mcp-audit`'s policy loader could
+  accept a scope-map + a per-key scope set and run the identical behaviour⋈policy engine. Different
+  policy source, same core.
+- **B2. Client-library-mode capture** via the existing `retoken proxy` sidecar → normalise captured
+  MCP tool calls into the same row shape `mcp_audit.load_spend_rows` expects. Serves the no-gateway
+  population without a new engine.
+
+Decision recorded: **gateway-mode first**; B1/B2 are deferred second fronts.
+
+---
+
 ## 2026-07-20 — Strategic pivot + first prototype landed
 
 **What changed (the big one): the product's job was redefined.**
