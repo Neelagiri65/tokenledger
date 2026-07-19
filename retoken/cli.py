@@ -327,11 +327,26 @@ def main(argv: list[str] | None = None) -> int:
     ma.add_argument("--throughput_tokens_per_hour", type=float, default=None,
                     help="rented: assumed throughput fallback / for utilisation")
 
+    pma = sub.add_parser("mcp-audit",
+                         help="agent MCP tool-use accountability: least-privilege + conformance + attributed spend")
+    pma.add_argument("spendlog", help="LiteLLM spend export (StandardLoggingPayload JSONL)")
+    pma.add_argument("permissions", help="object-permission / MCP-server policy snapshot (JSON)")
+    pma.add_argument("--json", action="store_true", help="emit machine-readable JSON only")
+
     args = p.parse_args(argv)
     return {"demo": _cmd_demo, "ingest": _cmd_ingest, "report": _cmd_report,
             "cockpit": _cmd_cockpit, "checkpoint": _cmd_checkpoint,
             "dashboard": _cmd_dashboard, "models": _cmd_models,
-            "evaluate": _cmd_evaluate, "proxy": _cmd_proxy}[args.cmd](args)
+            "evaluate": _cmd_evaluate, "proxy": _cmd_proxy,
+            "mcp-audit": _cmd_mcp_audit}[args.cmd](args)
+
+
+def _cmd_mcp_audit(args) -> int:
+    from . import mcp_audit
+    argv = ["retoken mcp-audit", args.spendlog, args.permissions]
+    if args.json:
+        argv.append("--json")
+    return mcp_audit.main(argv)
 
 
 if __name__ == "__main__":

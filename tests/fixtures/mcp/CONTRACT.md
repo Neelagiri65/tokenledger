@@ -41,7 +41,8 @@ never a silent zero.
   LLM = 0.05 EXACT. Total accountable = 0.059 EXACT + 1 unpriced MCP call.
 - **key-beta / support-agent**: granted 2 tools (github: list_issues, get_repo); used 3
   (list_issues, get_repo, create_issue); **1 violation: github/create_issue (req-010)** — not in
-  grant. Spend: MCP = 2×0.001 + 1×0.001 + 1×0.002 = 0.005 EXACT (all priced); LLM = 0.03 EXACT.
+  grant. Spend: MCP = 1×0.001 (list_issues) + 1×0.001 (get_repo) + 1×0.002 (create_issue) = 0.004
+  EXACT (all priced, 3 MCP rows: req-008/009/010); LLM = 0.03 EXACT.
 - **delete_repo / merge_pr / create_refund**: allowed on the server but never granted to either
   key — must NOT appear as unused *grants* (they were never granted). `github/delete_repo` is
   explicitly blocked for alpha.
