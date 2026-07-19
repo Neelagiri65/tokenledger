@@ -4,6 +4,32 @@ Append-only. Newest entry on top. Never consolidate or delete prior entries.
 
 ---
 
+## 2026-07-20 (later still) — Open-weight verification revived + vault indexed
+
+**Decision reversed: do NOT retire the legacy token-reconciliation code.** Prompted by the user
+("we also had access to bytedance and nvidia models — can we not use it?"). "Verification is dead"
+was too absolute. Live corridor for EXACT recount = **open-weight model (public tokenizer) +
+third-party host/reseller biller + per-token pricing** — more teeth than OpenAI-verification because
+an open weight is served by many hosts, each with its own chat template + tokenizer version → real,
+catchable token-count drift.
+- **NVIDIA Nemotron** — fully open, HF tokenizer → EXACT. **ByteDance Seed-Coder** (MIT) → EXACT.
+  **ByteDance Doubao Seed 2.x** (Volcano/Ark) → CLOSED → BOUNDED. ("ByteDance access" ≠ verifiable;
+  depends on the model.)
+- Caveats: consistency check (teeth in mismatches); reasoning tokens BOUNDED even on open models
+  unless reasoning text returned; need prompt-as-sent (chat template applied) to recount.
+- **Product unifies on one LiteLLM ingester, three checks:** open-weight row → EXACT recount (verify);
+  closed row → BOUNDED; MCP tool-call row → behaviour⋈policy accountability.
+- Revised NEXT: KEEP + fix the 6 legacy reconcile tests (they're the open-weight engine, not dead
+  weight); fold EXACT recount in as the first ingester check; add Nemotron + Seed-Coder tokenizers.
+
+**Vault indexed (kb-ingest).** Saved to agent-vault and available to vault-rag:
+- raw/research/2026-07-20-retoken-litellm-agent-accountability.md
+- wiki/research/litellm-mcp-agent-accountability.md (new lead article; supersedes llm-token-metering-verification)
+- learnings/discoveries/open-weight-verification-is-the-live-niche-2026-07-20.md
+- MASTER-INDEX.md + raw/research/INDEX.md updated; token-metering article cross-linked forward.
+
+---
+
 ## 2026-07-20 (later) — Two-mode framing + scope-map policy input (backlog)
 
 Reviewed Rick Hightower's article "Securing LiteLLM's MCP Integration" (full 35-page PDF).
