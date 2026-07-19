@@ -1,0 +1,45 @@
+{
+  "mcp_servers": [
+    {
+      "server_id": "github",
+      "server_name": "github",
+      "allowed_tools": ["create_issue", "list_issues", "get_repo", "delete_repo", "merge_pr"],
+      "mcp_server_cost_info": {"default_cost_per_query": 0.001}
+    },
+    {
+      "server_id": "stripe",
+      "server_name": "stripe",
+      "allowed_tools": ["get_charge", "list_charges", "create_refund"],
+      "mcp_server_cost_info": {}
+    }
+  ],
+  "object_permissions": [
+    {
+      "grantee_type": "key",
+      "grantee_id": "key-alpha",
+      "agent_id": "billing-agent",
+      "team_id": "team-fin",
+      "mcp_servers": ["github", "stripe"],
+      "mcp_access_groups": [],
+      "mcp_tool_permissions": {
+        "github": ["create_issue", "list_issues", "get_repo"],
+        "stripe": ["get_charge", "list_charges"]
+      },
+      "mcp_toolsets": ["finance-readwrite"],
+      "blocked_tools": ["github/delete_repo"]
+    },
+    {
+      "grantee_type": "key",
+      "grantee_id": "key-beta",
+      "agent_id": "support-agent",
+      "team_id": "team-support",
+      "mcp_servers": ["github"],
+      "mcp_access_groups": [],
+      "mcp_tool_permissions": {
+        "github": ["list_issues", "get_repo"]
+      },
+      "mcp_toolsets": ["support-readonly"],
+      "blocked_tools": []
+    }
+  ]
+}

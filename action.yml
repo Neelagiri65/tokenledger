@@ -1,0 +1,69 @@
+name: "TokenLedger AI spend audit"
+description: "Re-count the AI tokens billed in this run and report how much of the spend is accountable, and how much is a black box, as a sticky pull request comment."
+author: "Nativerse"
+branding:
+  icon: "bar-chart-2"
+  color: "purple"
+
+inputs:
+  spend-log:
+    description: "Path to the provider or gateway spend log to audit (e.g. litellm_spendlogs.jsonl)."
+    required: true
+  format:
+    description: "Log format: litellm | jsonl | bedrock."
+    required: false
+    default: "litellm"
+  comment:
+    description: "Post the audit as a sticky comment on the pull request."
+    required: false
+    default: "true"
+  python-version:
+    description: "Python version used to run retoken."
+    required: false
+    default: "3.11"
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install retoken
+      shell: bash
+      run: pip install "retoken[exact]"
+
+    - name: Re-count and reconcile
+      shell: bash
+      run: |
+        retoken ingest "${{ inputs.spend-log }}" --format "${{ inputs.format }}" --db retoken.db
+        retoken report --db retoken.db --md retoken-report.md
+        echo "----- retoken audit -----"
+        cat retoken-report.md
+
+    - name: Sticky PR comment
+      if: ${{ inputs.comment == 'true' && github.event_name == 'pull_request' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        MARKER="<!-- tokenledger-spend-audit -->"
+        {
+          echo "$MARKER"
+          echo "### TokenLedger AI spend audit"
+          echo ""
+          echo "How much of this run's AI spend is accountable, and how much is paid on trust."
+          echo ""
+          cat retoken-report.md
+          echo ""
+          echo "_Re-counting the output is a consistency check that binds the bill to the delivered artifact. Reasoning and cache stay unverifiable. [Method](https://github.com/Neelagiri65/tokenledger/blob/master/docs/known-limitations.md)._"
+        } > body.md
+        PR="${{ github.event.pull_request.number }}"
+        ID=$(gh api "repos/${{ github.repository }}/issues/$PR/comments" --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" | head -1)
+        if [ -n "$ID" ]; then
+          gh api -X PATCH "repos/${{ github.repository }}/issues/comments/$ID" -F body=@body.md >/dev/null
+          echo "Updated sticky comment $ID"
+        else
+          gh api -X POST "repos/${{ github.repository }}/issues/$PR/comments" -F body=@body.md >/dev/null
+          echo "Created sticky comment"
+        fi
