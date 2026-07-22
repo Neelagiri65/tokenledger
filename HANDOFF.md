@@ -4,6 +4,27 @@ Append-only. Newest entry on top. Never consolidate or delete prior entries.
 
 ---
 
+## 2026-07-23 — Detour session: no tokenledger work (System-Design Harness Playbook built in vault)
+
+This session ran in the tokenledger directory but did **no tokenledger work** — it distilled the
+ByteByteGo Big Archive 2025 PDF (442pp, 213 articles) via a 12-agent Workflow (9 domain distillers
+→ synthesiser + evolution analyst + completeness critic, 521k subagent tokens, 0 errors) into a
+harness-engineering playbook for real-world system design.
+
+**Output (all in agent-vault, commit 5f14bac, pushed):**
+- Playbook: `wiki/concepts/system-design-harness-playbook-2026-07-23.md` — 4 layers: constraint
+  harness → 15-law invariant core + decision ordering → volatility-classed tech bindings (a/b/c
+  tiers, downhill-only coupling) → evolution harness (trigger + pattern catalogues, quarterly
+  binding review) + 9 gap modules + templates (binding record, constraint test, ADR).
+- Raw: `raw/research/2026-07-23-bytebytego-system-design-harness/` (12 files).
+- MASTER-INDEX pointer added. Not yet kb-ingested for vault-rag — run kb-ingest next vault session.
+
+**Tokenledger NEXT unchanged (from 2026-07-20):** KEEP + fix the 6 legacy reconcile tests (open-weight
+engine, not dead weight); fold EXACT recount in as first ingester check; add Nemotron + Seed-Coder
+tokenizers.
+
+---
+
 ## 2026-07-20 (later still) — Open-weight verification revived + vault indexed
 
 **Decision reversed: do NOT retire the legacy token-reconciliation code.** Prompted by the user
