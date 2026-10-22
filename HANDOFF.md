@@ -4,6 +4,10 @@ Append-only. Newest entry on top. Never consolidate or delete prior entries.
 
 ---
 
+## 2026-10-23 — LiteLLM example pinned by digest; cost model is missing the Claude 5.5 models
+- `docker-compose.yml` commented sidecar example pointed at `ghcr.io/berriai/litellm:main-latest`, the tag that served the malicious LiteLLM 1.107.0 on 2026-10-21. Pinned to `v1.106.2@sha256:7294b90f868c5c38c99b83021c7ba46f9b439e95f8e32964c925c7d2563a03f7` (digest verified against ghcr). Commit bd50a36, pushed.
+- **Next:** cost model only knows `claude-opus-4` / `claude-sonnet-4`; add Opus 5.5, Sonnet 5.5, Haiku 5.5 with prices from the claude-api skill (not memory).
+
 ## 2026-07-23 — Detour session: no tokenledger work (System-Design Harness Playbook built in vault)
 
 This session ran in the tokenledger directory but did **no tokenledger work** — it distilled the
