@@ -23,3 +23,6 @@ media/slides/
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Private working notes live in the agent vault (symlinked locally)
+HANDOFF.md
